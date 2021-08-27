@@ -49,13 +49,10 @@
 
         <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f981fd80b1fe939a8deee13f73970262&libraries=services"></script>
         <script>
-            const container = document.getElementById('map'); //지도를 담을 영역의 DOM 레퍼런스
-            const options = { //지도를 생성할 때 필요한 기본 옵션
-                center: new kakao.maps.LatLng(33.450701, 126.570667), //지도의 중심좌표.
-                level: 3 //지도의 레벨(확대, 축소 정도)
-            };
-
-            const map = new kakao.maps.Map(container, options); //지도 생성 및 객체 리턴
+            const map = new kakao.maps.Map(document.getElementById('map'), {
+                center: new kakao.maps.LatLng(33.450701, 126.570667),
+                level: 3
+            });
 
             const geocoder = new kakao.maps.services.Geocoder();
             const places = new kakao.maps.services.Places();
@@ -87,6 +84,7 @@
                     drawMarker();
                     map.setLevel(result[0].address_type === 'REGION' ? 9 : 3);
 
+                    document.querySelector("#address-keyword").value = "";
                     document.querySelector("#address-keyword").focus();
                 }
             };
@@ -94,8 +92,6 @@
             const callback2 = (result, status) => {
                 console.log(result);
                 if (status === kakao.maps.services.Status.OK) {
-                    setCenter(result[0].y, result[0].x);
-
                     clearMarker();
                     removeMarker();
                     clearInfoWindow();
@@ -116,6 +112,8 @@
                     });
                     drawMarker();
                     map.setLevel(5);
+
+                    setCenter(result[0].y, result[0].x);
                 }
             };
 
