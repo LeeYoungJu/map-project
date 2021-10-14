@@ -2,6 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="utf-8" />
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js" crossorigin="anonymous"></script>
         <style>
             .map {
                 width: 600px;
@@ -30,149 +33,75 @@
             }
         </style>
     </head>
-    <body>
-        <div class="search-input-box">
-            <div class="input-label">주소</div>
-            <input type="text" class="address_box" id="address-region" />
-        </div>
-        <div class="search-input-box">
-            <div class="input-label">키워드</div>
-            <input type="text" class="address_box" id="address-keyword" />
-        </div>
-        <div class="map-box">
-            <div class="map" id="map">
+    <body class="sb-nav-fixed">
+        <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+            <!-- Navbar Brand-->
+            <a class="navbar-brand ps-3" href="index.html">Map prototype</a>
+            <!-- Sidebar Toggle-->
+            <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+            <!-- Navbar Search-->
+            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+                <div class="input-group">
+                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
+                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
+                </div>
+            </form>
+            <!-- Navbar-->
+            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#!">Settings</a></li>
+                        <li><a class="dropdown-item" href="#!">Activity Log</a></li>
+                        <li><hr class="dropdown-divider" /></li>
+                        <li><a class="dropdown-item" href="#!">Logout</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+        <div id="layoutSidenav">
+            <div id="layoutSidenav_nav">
+                <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                    <div class="sb-sidenav-menu">
+                        <div class="nav">
+                            <div class="sb-sidenav-menu-heading">Core</div>
+                            <a class="nav-link" href="index.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                Map
+                            </a>                            
+                        </div>
+                    </div>
+                    <div class="sb-sidenav-footer">
+                        <div class="small">Logged in as:</div>
+                        Start Bootstrap
+                    </div>
+                </nav>
             </div>
-            <div class="info-box">
-                
+            <div id="layoutSidenav_content">
+                <main>
+                    <div style="padding: 10px;">
+                        <div class="search-input-box">
+                            <div class="input-label">주소</div>
+                            <input type="text" class="address_box" id="address-region" />
+                        </div>
+                        <div class="search-input-box">
+                            <div class="input-label">키워드</div>
+                            <input type="text" class="address_box" id="address-keyword" />
+                        </div>
+                        <div class="map-box">
+                            <div class="map" id="map">
+                            </div>
+                            <div class="info-box">
+                                
+                            </div>
+                        </div>
+                    </div>
+                </main>
             </div>
         </div>
 
-        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f981fd80b1fe939a8deee13f73970262&libraries=services"></script>
-        <script>
-            const map = new kakao.maps.Map(document.getElementById('map'), {
-                center: new kakao.maps.LatLng(33.450701, 126.570667),
-                level: 3
-            });
+        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=f981fd80b1fe939a8deee13f73970262&libraries=services"></script>      
 
-            const geocoder = new kakao.maps.services.Geocoder();
-            const places = new kakao.maps.services.Places();
-
-            let marker_list = [];
-            let infowindow_list = [];
-
-            const callback = (result, status) => {
-                console.log(result[0]);
-                if (status === kakao.maps.services.Status.OK) {
-                    setCenter(result[0].y, result[0].x);
-
-                    clearMarker();
-                    removeMarker();
-                    clearInfoWindow();
-                    removeInfowindow();
-
-                    const marker = new kakao.maps.Marker({ 
-                        position: map.getCenter() 
-                    });                    
-                    marker_list.push(marker);
-
-                    const infowindow = new kakao.maps.InfoWindow({
-                        position : map.getCenter(),
-                        content : `<div class="marker-infowindow"><div>${result[0].address_name}</div></div>` 
-                    });
-                    infowindow_list.push(infowindow);
-
-                    drawMarker();
-                    map.setLevel(result[0].address_type === 'REGION' ? 9 : 3);
-
-                    document.querySelector("#address-keyword").value = "";
-                    document.querySelector("#address-keyword").focus();
-                }
-            };
-
-            const callback2 = (result, status) => {
-                console.log(result);
-                if (status === kakao.maps.services.Status.OK) {
-                    clearMarker();
-                    removeMarker();
-                    clearInfoWindow();
-                    removeInfowindow();
-
-                    result.forEach((item) => {
-                        const markerPos = new kakao.maps.LatLng(item.y, item.x);
-                        const marker = new kakao.maps.Marker({ 
-                            position: markerPos
-                        }); 
-                        marker_list.push(marker);
-                        
-                        const infowindow = new kakao.maps.InfoWindow({
-                            position : markerPos, 
-                            content : `<div class="marker-infowindow"><div>${item.place_name}</div></div>` 
-                        });
-                        infowindow_list.push(infowindow);
-                    });
-                    drawMarker();
-                    map.setLevel(5);
-
-                    setCenter(result[0].y, result[0].x);
-                }
-            };
-
-            document.querySelector('#address-region').addEventListener('keypress', function(e) {
-                if(e.key === 'Enter') {
-                    const { target : { value }} = e;
-                    
-                    geocoder.addressSearch(value, callback, {
-                        analyze_type: kakao.maps.services.AnalyzeType.SIMILAR,
-                    });
-                }
-            });
-
-            document.querySelector("#address-keyword").addEventListener('keypress', function(e) {
-                if(e.key === 'Enter') {
-                    const { target : { value }} = e;
-
-                    places.keywordSearch(value, callback2, {
-                        location: map.getCenter(),
-                        radius: 5000,
-                        sort: kakao.maps.services.SortBy.DISTANCE,
-                    });
-                }
-            });
-
-            function clearMarker() {
-                marker_list.forEach(marker => {
-                    marker.setMap(null);
-                });
-            }
-            function clearInfoWindow() {
-                infowindow_list.forEach(infowindow => {
-                    infowindow.close();
-                });
-            }
-
-            function removeMarker() {
-                marker_list = [];
-            }
-            function removeInfowindow() {
-                infowindow_list = [];
-            }
-
-            function drawMarker() {
-                marker_list.forEach((marker, i) => {
-                    marker.setMap(map);
-                    if(infowindow_list[i]) {
-                        infowindow_list[i].open(map, marker);
-                    }
-                });
-            };
-
-            function setCenter(lat, lng) {            
-                // 이동할 위도 경도 위치를 생성합니다 
-                const centerXY = new kakao.maps.LatLng(lat, lng);
-                
-                // 지도 중심을 이동 시킵니다
-                map.setCenter(centerXY);
-            }
-        </script>
+        <script src="js/scripts.js"></script>
     </body>
 </html>
